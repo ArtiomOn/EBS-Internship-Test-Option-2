@@ -1,25 +1,31 @@
-from rest_framework.generics import GenericAPIView, ListAPIView
-from drf_yasg.utils import swagger_auto_schema
-from drf_util.decorators import serialize_decorator
 from django.contrib.auth import get_user_model
+from rest_framework import mixins
+from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from apps.task.models import Task
-from apps.users.serializers import (
-    UserDetailSerializer,
-    TaskCurrentUserSerializer,
-    UserListSerializer
-)
+from apps.users.serializers import UserSerializer, UserListSerializer
+
 
 User = get_user_model()
 
 
-class UserRegisterView(GenericAPIView):
-    @swagger_auto_schema(request_body=UserDetailSerializer)
-    @serialize_decorator(UserDetailSerializer)
-    def post(self, request):
+class UserViewSet(mixins.ListModelMixin, GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        """
+        Can use __doc__ to add description to endpoints even if they are created using mixins
+        """
+        return super(UserViewSet, self).list(request, *args, **kwargs)
+
+    @action(methods=['post'], detail=False, url_path='register',
+            permission_classes=[AllowAny], serializer_class=UserSerializer)
+    def register(self, request, *args, **kwargs):
         validated_data = request.serializer.validated_data
 
         user = User.objects.create(
@@ -42,23 +48,4 @@ class UserRegisterView(GenericAPIView):
         })
 
 
-class UserList(ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserListSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class TaskCurrentUserListView(ListAPIView):
-    serializer_class = TaskCurrentUserSerializer
-    permission_classes = [IsAuthenticated]
-
-    def list(self, request, *args, **kwargs):
-        queryset = Task.objects.filter(assigned_to=request.user)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+# Todo: remove unused code
