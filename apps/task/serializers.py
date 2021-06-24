@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from rest_framework.relations import HyperlinkedIdentityField
-from rest_framework.serializers import HyperlinkedModelSerializer
 
 from apps.task.models import Task, Comment
 
@@ -42,7 +40,7 @@ class TaskUpdateAssignedUserSerializer(serializers.ModelSerializer):
         fields = ('assigned_to',)
 
 
-class TaskUpdateStatusSerializer(serializers.ModelSerializer):
+class TaskUpdateUserStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('status',)
@@ -55,8 +53,6 @@ class CreateCommentSerializer(serializers.ModelSerializer):
 
 
 class AllCommentSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = Comment
         fields = ('content',)

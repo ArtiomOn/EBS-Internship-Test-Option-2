@@ -1,6 +1,8 @@
-from apps.task.models import Task
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from apps.task.models import Task
+
 
 User = get_user_model()
 
