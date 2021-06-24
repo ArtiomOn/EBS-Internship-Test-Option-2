@@ -20,7 +20,8 @@ class CustomUserManager(UserManager):
 
 class CustomUser(AbstractUser):
     objects = CustomUserManager()
-    email = EmailField(_('email address'), blank=True, unique=True)
+    # Todo: if email is used as username it should not be blank
+    email = EmailField(_('email address'), blank=False, unique=True)
 
     REQUIRED_FIELDS = []
     USERNAME_FIELD = 'email'

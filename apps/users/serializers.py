@@ -1,15 +1,12 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from apps.task.models import Task
-
 
 User = get_user_model()
 
 
-class UserDetailSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    email = serializers.EmailField(write_only=True)
 
     class Meta:
         model = User
@@ -22,9 +19,3 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'full_name')
-
-
-class TaskCurrentUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('id', 'title')
