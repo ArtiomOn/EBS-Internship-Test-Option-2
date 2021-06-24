@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.task.models import Task, Comment
+from apps.tasks.models import Task, Comment
 
 
 class TaskListSerializer(serializers.ModelSerializer):
@@ -34,25 +34,23 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         }
 
 
-class TaskUpdateAssignedUserSerializer(serializers.ModelSerializer):
+class TaskAssignedToSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('assigned_to',)
 
 
-class TaskUpdateUserStatusSerializer(serializers.ModelSerializer):
+class TaskStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('status',)
 
 
-class CreateCommentSerializer(serializers.ModelSerializer):
+# Todo: comment list should contain id
+class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('id', 'content')
-
-
-class AllCommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = ('content',)
+        fields = "__all__"
+        extra_kwargs = {
+            'task': {'read_only': True}
+        }
