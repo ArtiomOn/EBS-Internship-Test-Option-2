@@ -8,7 +8,6 @@ class Task(models.Model):
     title = models.CharField(max_length=155)
     description = models.CharField(max_length=255)
     status = models.BooleanField(default=False, verbose_name='Completed')
-    # Todo: related_name manager should be plural (it represent an queryset not a single object)
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned_tasks')
 
     def __str__(self):

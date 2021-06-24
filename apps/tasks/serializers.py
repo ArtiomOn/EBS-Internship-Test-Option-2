@@ -46,7 +46,6 @@ class TaskStatusSerializer(serializers.ModelSerializer):
         fields = ('status',)
 
 
-# Todo: comment list should contain id
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment

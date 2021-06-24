@@ -18,9 +18,6 @@ class UserViewSet(mixins.ListModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request, *args, **kwargs):
-        """
-        Can use __doc__ to add description to endpoints even if they are created using mixins
-        """
         return super(UserViewSet, self).list(request, *args, **kwargs)
 
     @action(methods=['post'], detail=False, url_path='register',
@@ -46,6 +43,3 @@ class UserViewSet(mixins.ListModelMixin, GenericViewSet):
             'refresh': str(refresh),
             'access': str(refresh.access_token)
         })
-
-
-# Todo: remove unused code
