@@ -2,8 +2,7 @@ from rest_framework import serializers
 
 from apps.tasks.models import (
     Task,
-    Comment,
-    Timer
+    Comment
 )
 
 
@@ -57,16 +56,3 @@ class CommentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'task': {'read_only': True}
         }
-
-
-class TimerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Timer
-        exclude = ('task', 'real_time')
-
-
-class TimerDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Timer
-        fields = ('execution_end',)
-
