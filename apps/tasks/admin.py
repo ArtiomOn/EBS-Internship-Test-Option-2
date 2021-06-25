@@ -19,5 +19,5 @@ class CommentAdmin(ModelAdmin):
 
 
 @admin.register(Timer)
-class TaskAdmin(ModelAdmin):
-    list_display = ['id', 'execution_start', 'execution_end', 'real_time', 'root_task']
+class TimerAdmin(ModelAdmin):
+    list_display = ['id', 'execution_start', 'execution_end', 'real_time', 'task']

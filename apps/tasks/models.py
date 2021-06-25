@@ -33,11 +33,11 @@ class Comment(models.Model):
 class Timer(models.Model):
     execution_start = models.DateTimeField(auto_now_add=True, verbose_name='Start at:')
     execution_end = models.DateTimeField(auto_now=True, verbose_name='Finish at:')
-    real_time = models.TimeField(null=True, verbose_name='Real time', blank=True)
-    root_task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_timer', verbose_name='Root task')
+    real_time = models.TimeField(null=True, blank=True, verbose_name='Average time')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='task_timer', verbose_name='Root task')
 
     def __str__(self):
-        return f'{self.execution_start}, {self.execution_start}'
+        return f'{self.execution_start}, {self.execution_end}, {self.task}'
 
     class Meta:
         verbose_name = 'Timer'

@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'django_filters',
 
     'apps.tasks',
-    'apps.users'
+    'apps.users',
+    'apps.journal'
 ]
 
 MIDDLEWARE = [

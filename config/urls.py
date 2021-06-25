@@ -18,10 +18,9 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # Todo: placing swagger on root is more preferable
-    # Todo: use 'path' or 're_path' instead of deprecated 'url'
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('admin/', admin.site.urls),
     path('', include('apps.tasks.urls')),
-    path('', include('apps.users.urls'))
+    path('', include('apps.users.urls')),
+    path('', include('apps.journal.urls'))
 ]
