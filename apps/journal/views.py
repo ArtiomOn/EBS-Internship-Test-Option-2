@@ -22,7 +22,6 @@ from apps.tasks.models import Task
 
 
 class TimerViewSet(NestedViewSetMixin,
-                   mixins.ListModelMixin,
                    GenericViewSet):
     queryset = TimeLog.objects.all()
     serializer_class = TimeJournalSerializer
@@ -37,7 +36,7 @@ class TimerViewSet(NestedViewSetMixin,
             return []
         return super(TimerViewSet, self).get_queryset()
 
-    @action(methods=['get'], detail=False, url_path='profile', serializer_class=TimeProfileListSerializer)
+    @action(methods=['get'], detail=False, url_path='list', serializer_class=TimeProfileListSerializer)
     def time_profile_list(self, request, *args, **kwargs):
         queryset = TimeLog.objects.annotate(total_duration=Sum('duration'))
 
