@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.mail import send_mail
+from django.db.models import Sum
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -45,6 +46,11 @@ class TaskViewSet(
     def perform_create(self, serializer):
         serializer.save(assigned_to=self.request.user)
 
+    def get_queryset(self):
+        if self.action == 'list':
+            return self.queryset.annotate(total_duration=Sum('time_logs__duration'))
+        return super(TaskViewSet, self).get_queryset()
+
     @action(methods=['patch'], detail=True, url_path='assign',
             serializer_class=TaskAssignedToSerializer)
     def assign(self, request, *args, **kwargs):
@@ -55,11 +61,6 @@ class TaskViewSet(
         instance.save()
         self.send_task_assigned_email(instance.id, instance.assigned_to.email)
         return Response(status=status.HTTP_200_OK)
-
-    # @action(methods=['post'], detail=True, url_path='start', queryset=Timer.objects.all())
-    # def begin(self, request, *args, **kwargs):
-    #     instance = self.get_object()
-    #
 
     @action(methods=['patch'], detail=True, url_path='complete',
             serializer_class=TaskStatusSerializer)
