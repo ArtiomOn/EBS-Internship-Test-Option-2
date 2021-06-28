@@ -1,15 +1,21 @@
 from rest_framework import serializers
 
-from apps.journal.models import Timer
+from apps.journal.models import TimeLog
 
 
-class TimerSerializer(serializers.ModelSerializer):
+class TimeLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Timer
-        exclude = ('task', 'real_time')
+        model = TimeLog
+        fields = ('id',)
+        extra_kwargs = {
+            'started_at': {'write_only': True}
+        }
 
 
-class TimerDetailSerializer(serializers.ModelSerializer):
+class TimeLogDetailSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Timer
-        fields = ('execution_end',)
+        model = TimeLog
+        fields = ('id',)
+        extra_kwargs = {
+            'duration': {'write_only': True}
+        }

@@ -8,9 +8,9 @@ from apps.tasks.views import TaskViewSet
 tasks_router = routers.SimpleRouter()
 tasks_router.register(r'tasks', TaskViewSet)
 
-timers_router = routers.NestedSimpleRouter(tasks_router, r'tasks', lookup='task')
-timers_router.register(r'timers', TimerViewSet)
+timelog_router = routers.NestedSimpleRouter(tasks_router, r'tasks', lookup='task')
+timelog_router.register(r'timelog', TimerViewSet)
 
 urlpatterns = [
-    url(r'', include(timers_router.urls)),
+    url('', include(timelog_router.urls))
 ]

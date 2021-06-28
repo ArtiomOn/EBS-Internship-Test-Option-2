@@ -98,6 +98,11 @@ class CommentViewSet(
         'task_pk': 'task__pk',
     }
 
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return []
+        return super(CommentViewSet, self).get_queryset()
+
     def perform_create(self, serializer):
         serializer.save(task_id=self.kwargs.get('task_pk'))
         self.send_task_created_email(serializer.data['id'], recipient=self.request.user.email)
