@@ -20,7 +20,7 @@ from apps.tasks.serializers import (
     TaskDetailSerializer,
     TaskAssignedToSerializer,
     TaskStatusSerializer,
-    CommentSerializer
+    CommentSerializer,
 )
 
 
@@ -49,6 +49,9 @@ class TaskViewSet(
     def get_queryset(self):
         if self.action == 'list':
             return self.queryset.annotate(total_duration=Sum('time_logs__duration'))
+
+        if getattr(self, 'swagger_fake_view', False):
+            return []
         return super(TaskViewSet, self).get_queryset()
 
     @action(methods=['patch'], detail=True, url_path='assign',

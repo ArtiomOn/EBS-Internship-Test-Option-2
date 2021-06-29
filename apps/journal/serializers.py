@@ -41,4 +41,10 @@ class TimeProfileListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeLog
-        fields = ('id', 'task', 'total_duration', 'started_at')
+        fields = ('id', 'task', 'total_duration', 'user', 'started_at')
+
+
+class TimeAccountTimeLoggedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TimeLog
+        fields = '__all__'
