@@ -58,3 +58,14 @@ class CommentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'task': {'read_only': True}
         }
+
+
+class TaskAmountSerializer(serializers.ModelSerializer):
+    total_duration = serializers.DurationField()
+
+    class Meta:
+        model = Task
+        fields = ('id', 'title', 'total_duration')
+        extra_kwargs = {
+            'total_duration': {'read_only': True}
+        }

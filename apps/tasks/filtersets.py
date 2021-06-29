@@ -4,6 +4,9 @@ from apps.tasks.models import Task
 
 
 class TaskFilterSet(FilterSet):
+    ordering = filters.OrderingFilter(fields=[
+        ('total_duration', 'total_duration')
+    ])
     is_assigned_to_me = filters.BooleanFilter(method='filter_assigned_to_me')
     is_completed = filters.BooleanFilter(field_name='status')
 

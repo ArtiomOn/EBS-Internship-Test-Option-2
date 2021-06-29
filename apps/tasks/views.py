@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -20,7 +22,7 @@ from apps.tasks.serializers import (
     TaskDetailSerializer,
     TaskAssignedToSerializer,
     TaskStatusSerializer,
-    CommentSerializer,
+    CommentSerializer, TaskAmountSerializer,
 )
 
 
@@ -41,7 +43,9 @@ class TaskViewSet(
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
     filterset_class = TaskFilterSet
+    ordering_fields = ['total_duration']
 
     def perform_create(self, serializer):
         serializer.save(assigned_to=self.request.user)
@@ -49,10 +53,21 @@ class TaskViewSet(
     def get_queryset(self):
         if self.action == 'list':
             return self.queryset.annotate(total_duration=Sum('time_logs__duration'))
-
-        if getattr(self, 'swagger_fake_view', False):
-            return []
         return super(TaskViewSet, self).get_queryset()
+
+    @action(methods=['get'], detail=False, url_path='amount',
+            serializer_class=TaskAmountSerializer)
+    def task_amount(self, request, *args, **kwargs):
+        instance = Task.objects.all().annotate(total_duration=Sum('time_logs__duration'))
+        queryset = instance.order_by('-total_duration')[:20]
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @action(methods=['patch'], detail=True, url_path='assign',
             serializer_class=TaskAssignedToSerializer)
