@@ -78,7 +78,3 @@ class TimeLogViewSet(
     permission_classes = [IsAuthenticated]
     filterset_class = TimeLogFilerSet
 
-    def get_queryset(self):
-        if getattr(self, 'swagger_fake_view', False):
-            return []
-        return super(TimeLogViewSet, self).get_queryset()
