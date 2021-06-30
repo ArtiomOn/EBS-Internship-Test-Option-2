@@ -1,8 +1,12 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -11,41 +15,34 @@ from rest_framework import (
     status,
     mixins,
     viewsets,
-    generics,
     filters
 )
 
-from apps.tasks.models import Task, Comment
-from apps.tasks.filtersets import TaskFilterSet
+from apps.tasks.models import Task, Comment, TimeLog
+from apps.tasks.filtersets import TaskFilterSet, TimeLogFilerSet
 from apps.tasks.serializers import (
     TaskDetailSerializer,
     TaskAssignedToSerializer,
     TaskStatusSerializer,
     CommentSerializer,
-    TaskCreateSerializer,
+    TaskCreateSerializer, TimeJournalSerializer, TimeLogListSerializer, TimeLogSerializer,
 )
-
-
-class TaskFilterListView(generics.ListAPIView):
-    queryset = Task.objects.all()
-    permission_classes = [IsAuthenticated]
-    serializer_class = TaskCreateSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['^title']
 
 
 class TaskViewSet(
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
     GenericViewSet
 ):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = TaskFilterSet
     ordering_fields = ['total_duration']
+    search_fields = ['^title']
 
     def perform_create(self, serializer):
         serializer.save(assigned_to=self.request.user)
@@ -56,15 +53,9 @@ class TaskViewSet(
         return super(TaskViewSet, self).get_queryset()
 
     def get_serializer_class(self):
-        if self.action == 'create':
+        if self.action == 'create' or 'retrieve':
             return TaskCreateSerializer
         return super(TaskViewSet, self).get_serializer_class()
-
-    @action(methods=['get'], detail=True, url_path='detail', serializer_class=TaskCreateSerializer)
-    def get_task_detail(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
 
     @action(methods=['patch'], detail=True, url_path='assign',
             serializer_class=TaskAssignedToSerializer)
@@ -128,3 +119,70 @@ class CommentViewSet(
         send_mail('Your task is commented',
                   f'Your task with id {task_id} is commented',
                   settings.EMAIL_HOST_USER, [recipient], fail_silently=False)
+
+
+class TimerViewSet(
+    NestedViewSetMixin,
+    GenericViewSet
+):
+    queryset = TimeLog.objects.all()
+    serializer_class = TimeJournalSerializer
+    permission_classes = [IsAuthenticated]
+
+    parent_lookup_kwargs = {
+        'task_pk': 'task__pk',
+    }
+
+    @action(methods=['get'], detail=False, url_path='list',
+            serializer_class=TimeLogListSerializer)
+    def time_log_list(self, request, *args, **kwargs):
+        queryset = TimeLog.objects.annotate(total_duration=Sum('duration'))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(task_id=self.kwargs.get('task_pk'))
+        return Response(serializer.data)
+
+    @action(methods=['post'], detail=False, url_path='detail',
+            serializer_class=TimeJournalSerializer)
+    def create_time_journal(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(task_id=self.kwargs.get('task_pk'),
+                        duration=timedelta(minutes=request.data['minutes']))
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=['post'], detail=False, url_path='start',
+            serializer_class=TimeLogSerializer)
+    def time_log_start(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(task_id=self.kwargs.get('task_pk'),
+                        started_at=timezone.now(), user=request.user)
+        return Response(status=status.HTTP_201_CREATED)
+
+    @action(methods=['patch'], detail=False, url_path='stop',
+            serializer_class=TimeLogSerializer)
+    def time_log_stop(self, request, *args, **kwargs):
+        instance = TimeLog.objects.filter(duration=None, user=request.user).first()
+        if instance is None:
+            raise NotFound()
+        serializer = self.get_serializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(duration=timezone.now() - instance.started_at)
+        return Response(status=status.HTTP_200_OK)
+
+
+class TimeLogViewSet(
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    queryset = TimeLog.objects.all()
+    serializer_class = TimeJournalSerializer
+    permission_classes = [IsAuthenticated]
+    filterset_class = TimeLogFilerSet

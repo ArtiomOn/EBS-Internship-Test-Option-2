@@ -3,7 +3,8 @@ from django.contrib.admin import ModelAdmin
 
 from apps.tasks.models import (
     Task,
-    Comment
+    Comment,
+    TimeLog
 )
 
 
@@ -15,3 +16,8 @@ class TaskAdmin(ModelAdmin):
 @admin.register(Comment)
 class CommentAdmin(ModelAdmin):
     list_display = ['id', 'content', 'task']
+
+
+@admin.register(TimeLog)
+class TimerAdmin(ModelAdmin):
+    list_display = ['id', 'task', 'started_at', 'user', 'duration']

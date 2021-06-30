@@ -47,7 +47,6 @@ INSTALLED_APPS = [
 
     'apps.tasks',
     'apps.users',
-    'apps.journal'
 ]
 
 MIDDLEWARE = [
