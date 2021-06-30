@@ -1,25 +1,18 @@
-from django.conf.urls import url
-from django.urls import include
+from django.urls import include, path
 from rest_framework_nested import routers
 
-from apps.tasks.views import TaskViewSet, CommentViewSet, TimeLogViewSet, TimerViewSet
+from apps.tasks.views import TaskViewSet, TaskCommentViewSet, TimeLogViewSet, TaskTimeLogViewSet
 
-tasks_router = routers.SimpleRouter()
-tasks_router.register(r'tasks', TaskViewSet)
 
-comments_router = routers.NestedSimpleRouter(tasks_router, r'tasks', lookup='task')
-comments_router.register(r'comments', CommentViewSet)
+base_router = routers.SimpleRouter()
+base_router.register(r'tasks', TaskViewSet)
+base_router.register(r'timelogs', TimeLogViewSet)
 
-timer_log_router = routers.SimpleRouter()
-timer_log_router.register(r'timelogs', TimeLogViewSet)
-
-timer_router = routers.NestedSimpleRouter(tasks_router, r'tasks', lookup='task')
-timer_router.register(r'timelog', TimerViewSet)
+task_router = routers.NestedSimpleRouter(base_router, r'tasks', lookup='task')
+task_router.register(r'comments', TaskCommentViewSet)
+task_router.register(r'timelogs', TaskTimeLogViewSet)
 
 urlpatterns = [
-    url(r'', include(tasks_router.urls)),
-    url(r'', include(comments_router.urls)),
-    url('', include(timer_router.urls)),
-    url('', include(timer_log_router.urls))
-
+    path('', include(base_router.urls)),
+    path('', include(task_router.urls)),
 ]
