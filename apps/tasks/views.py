@@ -26,6 +26,7 @@ from apps.tasks.serializers import (
     TaskStatusSerializer,
     CommentSerializer,
     TimeLogSerializer,
+    TaskCreateSerializer,
 )
 
 
@@ -53,8 +54,10 @@ class TaskViewSet(
         return super(TaskViewSet, self).get_queryset()
 
     def get_serializer_class(self):
-        if self.action in ('create', 'retrieve'):
+        if self.action == 'retrieve':
             return TaskSerializer
+        if self.action == 'create':
+            return TaskCreateSerializer
         return super(TaskViewSet, self).get_serializer_class()
 
     @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer)
