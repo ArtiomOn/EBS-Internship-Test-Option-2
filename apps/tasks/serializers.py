@@ -1,26 +1,17 @@
 from rest_framework import serializers
 
-from apps.tasks.models import (
-    Task,
-    Comment, TimeLog
-)
+from apps.tasks.models import Task, Comment, TimeLog
 
 
-class TaskDetailSerializer(serializers.ModelSerializer):
-    total_duration = serializers.DurationField()
+class TaskSerializer(serializers.ModelSerializer):
+    total_duration = serializers.DurationField(required=False, read_only=True)
 
     class Meta:
         model = Task
-        fields = ('id', 'title', 'description', 'status', 'total_duration', 'assigned_to')
+        fields = '__all__'
 
 
-class TaskCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('id', 'title', 'description', 'status', 'assigned_to')
-
-
-class TaskAssignedToSerializer(serializers.ModelSerializer):
+class TaskAssignToSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('assigned_to',)
@@ -42,26 +33,13 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class TimeLogSerializer(serializers.ModelSerializer):
+    started_at = serializers.DateTimeField()
+    duration = serializers.DurationField()
+
     class Meta:
         model = TimeLog
-        fields = ('id',)
+        fields = '__all__'
         extra_kwargs = {
-            'started_at': {'write_only': True},
-            'duration': {'read_only': True}
+            'task': {'read_only': True},
+            'user': {'read_only': True},
         }
-
-
-class TimeJournalSerializer(serializers.ModelSerializer):
-    minutes = serializers.DurationField(source='duration')
-
-    class Meta:
-        model = TimeLog
-        fields = ('id', 'started_at', 'minutes', 'user')
-
-
-class TimeLogListSerializer(serializers.ModelSerializer):
-    total_duration = serializers.DurationField()
-
-    class Meta:
-        model = TimeLog
-        fields = ('id', 'task', 'total_duration', 'user', 'started_at')
