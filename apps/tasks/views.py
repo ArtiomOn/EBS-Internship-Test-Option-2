@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter
 from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -22,20 +21,21 @@ from apps.tasks.serializers import (
     TaskDetailSerializer,
     TaskAssignedToSerializer,
     TaskStatusSerializer,
-    CommentSerializer, TaskAmountSerializer,
+    CommentSerializer,
+    TaskCreateSerializer,
 )
 
 
 class TaskFilterListView(generics.ListAPIView):
     queryset = Task.objects.all()
-    serializer_class = TaskDetailSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_class = TaskCreateSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['^title']
 
 
 class TaskViewSet(
     mixins.CreateModelMixin,
-    mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     GenericViewSet
@@ -55,18 +55,15 @@ class TaskViewSet(
             return self.queryset.annotate(total_duration=Sum('time_logs__duration'))
         return super(TaskViewSet, self).get_queryset()
 
-    @action(methods=['get'], detail=False, url_path='amount',
-            serializer_class=TaskAmountSerializer)
-    def task_amount(self, request, *args, **kwargs):
-        instance = Task.objects.all().annotate(total_duration=Sum('time_logs__duration'))
-        queryset = instance.order_by('-total_duration')[:20]
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return TaskCreateSerializer
+        return super(TaskViewSet, self).get_serializer_class()
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
+    @action(methods=['get'], detail=True, url_path='detail', serializer_class=TaskCreateSerializer)
+    def get_task_detail(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
     @action(methods=['patch'], detail=True, url_path='assign',

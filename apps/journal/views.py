@@ -2,8 +2,6 @@ from datetime import timedelta
 
 from django.db.models import Sum
 from django.utils import timezone
-from django_filters import filters
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -16,14 +14,16 @@ from apps.journal.models import TimeLog
 from apps.journal.filtersets import TimeLogFilerSet
 from apps.journal.serializers import (
     TimeLogSerializer,
-    TimeLogDetailSerializer,
     TimeJournalSerializer,
-    TimeProfileListSerializer, TimeAccountTimeLoggedSerializer
+    TimeLogListSerializer,
 )
 
 
-class TimerViewSet(NestedViewSetMixin,
-                   GenericViewSet):
+class TimerViewSet(
+    NestedViewSetMixin,
+    mixins.ListModelMixin,
+    GenericViewSet
+):
     queryset = TimeLog.objects.all()
     serializer_class = TimeJournalSerializer
     permission_classes = [IsAuthenticated]
@@ -32,8 +32,9 @@ class TimerViewSet(NestedViewSetMixin,
         'task_pk': 'task__pk',
     }
 
-    @action(methods=['get'], detail=False, url_path='list', serializer_class=TimeProfileListSerializer)
-    def time_profile_list(self, request, *args, **kwargs):
+    @action(methods=['get'], detail=False, url_path='list',
+            serializer_class=TimeLogListSerializer)
+    def time_log_list(self, request, *args, **kwargs):
         queryset = TimeLog.objects.annotate(total_duration=Sum('duration'))
 
         page = self.paginate_queryset(queryset)
@@ -42,23 +43,30 @@ class TimerViewSet(NestedViewSetMixin,
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(task_id=self.kwargs.get('task_pk'))
         return Response(serializer.data)
 
-    @action(methods=['post'], detail=False, url_path='detail', serializer_class=TimeJournalSerializer)
-    def time_journal_detail(self, request, *args, **kwargs):
+    @action(methods=['post'], detail=False, url_path='detail',
+            serializer_class=TimeJournalSerializer)
+    def create_time_journal(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(task_id=self.kwargs.get('task_pk'), duration=timedelta(minutes=request.data['minutes']))
+        serializer.save(task_id=self.kwargs.get('task_pk'),
+                        duration=timedelta(minutes=request.data['minutes']))
         return Response(status=status.HTTP_201_CREATED)
 
-    @action(methods=['post'], detail=False, url_path='start', serializer_class=TimeLogSerializer)
+    @action(methods=['post'], detail=False, url_path='start',
+            serializer_class=TimeLogSerializer)
     def time_log_start(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(task_id=self.kwargs.get('task_pk'), started_at=timezone.now(), user=request.user)
+        serializer.save(task_id=self.kwargs.get('task_pk'),
+                        started_at=timezone.now(), user=request.user)
         return Response(status=status.HTTP_201_CREATED)
 
-    @action(methods=['patch'], detail=False, url_path='stop', serializer_class=TimeLogDetailSerializer)
+    @action(methods=['patch'], detail=False, url_path='stop',
+            serializer_class=TimeLogSerializer)
     def time_log_stop(self, request, *args, **kwargs):
         instance = TimeLog.objects.filter(duration=None, user=request.user).first()
         if instance is None:
@@ -74,7 +82,6 @@ class TimeLogViewSet(
     GenericViewSet
 ):
     queryset = TimeLog.objects.all()
-    serializer_class = TimeAccountTimeLoggedSerializer
+    serializer_class = TimeJournalSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = TimeLogFilerSet
-

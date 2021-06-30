@@ -6,21 +6,6 @@ from apps.tasks.models import (
 )
 
 
-class TaskListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('id', 'title', 'description', 'total_duration')
-        extra_kwargs = {
-            'assigned_to': {'read_only': True}
-        }
-
-
-class AllTaskListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Task
-        fields = ('id', 'title')
-
-
 class TaskDetailSerializer(serializers.ModelSerializer):
     total_duration = serializers.DurationField()
 
@@ -32,11 +17,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ('id', 'title', 'description')
-        extra_kwargs = {
-            'title': {'write_only': True},
-            'description': {'write_only': True}
-        }
+        fields = ('id', 'title', 'description', 'status', 'assigned_to')
 
 
 class TaskAssignedToSerializer(serializers.ModelSerializer):
@@ -57,15 +38,4 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'task': {'read_only': True}
-        }
-
-
-class TaskAmountSerializer(serializers.ModelSerializer):
-    total_duration = serializers.DurationField()
-
-    class Meta:
-        model = Task
-        fields = ('id', 'title', 'total_duration')
-        extra_kwargs = {
-            'total_duration': {'read_only': True}
         }

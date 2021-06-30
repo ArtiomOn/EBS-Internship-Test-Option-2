@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from apps.journal.models import TimeLog
-from apps.tasks.models import Task
 
 
 class TimeLogSerializer(serializers.ModelSerializer):
@@ -9,15 +8,7 @@ class TimeLogSerializer(serializers.ModelSerializer):
         model = TimeLog
         fields = ('id',)
         extra_kwargs = {
-            'started_at': {'write_only': True}
-        }
-
-
-class TimeLogDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TimeLog
-        fields = ('id',)
-        extra_kwargs = {
+            'started_at': {'write_only': True},
             'duration': {'read_only': True}
         }
 
@@ -27,24 +18,12 @@ class TimeJournalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeLog
-        fields = ('id', 'minutes')
+        fields = ('id', 'started_at', 'minutes', 'user')
 
 
-class TimeJournalListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TimeLog
-        fields = '__all__'
-
-
-class TimeProfileListSerializer(serializers.ModelSerializer):
+class TimeLogListSerializer(serializers.ModelSerializer):
     total_duration = serializers.DurationField()
 
     class Meta:
         model = TimeLog
         fields = ('id', 'task', 'total_duration', 'user', 'started_at')
-
-
-class TimeAccountTimeLoggedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TimeLog
-        fields = '__all__'
