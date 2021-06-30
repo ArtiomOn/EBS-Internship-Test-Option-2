@@ -1,9 +1,10 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum, QuerySet
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.viewsets import GenericViewSet
@@ -52,7 +53,7 @@ class TaskViewSet(
         return super(TaskViewSet, self).get_queryset()
 
     def get_serializer_class(self):
-        if self.action == 'create' or 'retrieve':
+        if self.action in ('create', 'retrieve'):
             return TaskSerializer
         return super(TaskViewSet, self).get_serializer_class()
 
@@ -131,10 +132,16 @@ class TaskTimeLogViewSet(
         'task_pk': 'task__pk',
     }
 
+    def get_queryset(self):
+        if getattr(self, 'swagger_fake_view', False):
+            return []
+        return super(TaskTimeLogViewSet, self).get_queryset()
+
     def perform_create(self, serializer):
         serializer.save(
             task_id=self.kwargs.get('task_pk'),
-            user=self.request.user
+            user=self.request.user,
+            duration=timedelta(minutes=self.request.data['duration'])
         )
 
     @action(methods=['get'], detail=False, url_path='start')

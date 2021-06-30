@@ -4,7 +4,7 @@ from apps.tasks.models import Task, Comment, TimeLog
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    total_duration = serializers.DurationField(required=False, read_only=True)
+    duration = serializers.DurationField(required=False, read_only=True)
 
     class Meta:
         model = Task
