@@ -21,7 +21,6 @@ from apps.journal.serializers import (
 
 class TimerViewSet(
     NestedViewSetMixin,
-    mixins.ListModelMixin,
     GenericViewSet
 ):
     queryset = TimeLog.objects.all()
