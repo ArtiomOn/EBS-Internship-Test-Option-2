@@ -8,4 +8,4 @@ from apps.users.models import CustomUser
 
 @admin.register(CustomUser)
 class CustomUserAdmin(ModelAdmin):
-    list_display = ['id', 'email']
+    list_display = ['id', 'username', 'first_name', 'last_name', 'email']

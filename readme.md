@@ -27,7 +27,7 @@
 8. Complete a task - `PATCH | tasks/id/complete/`
 
 
-9. Remove task - `DELETE | tasks/id/`
+9. Remove task - `DELETE | tasks/id/delete/`
 
 
 10. Add comment to task - `POST | tasks/task_id/comments/`
@@ -42,10 +42,10 @@
 13. Stop timer for the started task - `GET | tasks/task_id/timelogs/stop/`
 
 
-14. Add time log for a task on a specific date - `POST | tasks/task_id/timelogs`
+14. Add time log for a task on a specific date - `POST | tasks/task_id/timelogs/`
 
 
-15. Get a list of time logs records by task - `GET | tasks/task_id/timelogs`
+15. Get a list of time logs records by task - `GET | tasks/task_id/timelogs/`
 
 
 16. Get the logged time in last month - `GET | timelogs/?date=this_month/`

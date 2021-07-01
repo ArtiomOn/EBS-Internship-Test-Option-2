@@ -8,7 +8,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework_nested.viewsets import NestedViewSetMixin
 from rest_framework import (
@@ -20,6 +20,7 @@ from rest_framework import (
 
 from apps.tasks.models import Task, Comment, TimeLog
 from apps.tasks.filtersets import TaskFilterSet, TimeLogFilerSet
+from apps.tasks.permissions import IsOwner
 from apps.tasks.serializers import (
     TaskSerializer,
     TaskAssignToSerializer,
@@ -32,14 +33,13 @@ from apps.tasks.serializers import (
 
 class TaskViewSet(
     mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     GenericViewSet
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = (IsAdminUser,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = TaskFilterSet
     ordering_fields = ['total_duration']
@@ -59,6 +59,12 @@ class TaskViewSet(
         if self.action == 'create':
             return TaskCreateSerializer
         return super(TaskViewSet, self).get_serializer_class()
+
+    @action(methods=['delete'], detail=True, permission_classes=[IsOwner])
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer)
     def assign(self, request, *args, **kwargs):
