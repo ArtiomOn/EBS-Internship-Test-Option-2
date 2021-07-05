@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'rest_framework',
     'django_filters',
+    'django_nose',
 
     'apps.tasks',
     'apps.users',
@@ -152,6 +153,14 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+    '--with-coverage',
+    '--cover-package=apps.tasks,apps.users',
+    '--cover-html',
+]
 
 AUTH_USER_MODEL = 'users.CustomUser'
 

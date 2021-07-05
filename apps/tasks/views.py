@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum, QuerySet
@@ -34,16 +32,24 @@ from apps.tasks.serializers import (
 class TaskViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
     mixins.RetrieveModelMixin,
     GenericViewSet
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser, IsOwner)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = TaskFilterSet
     ordering_fields = ['total_duration']
     search_fields = ['^title']
+
+    def get_permissions(self):
+        if self.action in ('create', 'list', 'retrieve'):
+            self.permission_classes = [IsAuthenticated]
+        if self.action == 'destroy':
+            self.permission_classes = [IsOwner]
+        return super(TaskViewSet, self).get_permissions()
 
     def perform_create(self, serializer):
         serializer.save(assigned_to=self.request.user)
@@ -60,13 +66,8 @@ class TaskViewSet(
             return TaskCreateSerializer
         return super(TaskViewSet, self).get_serializer_class()
 
-    @action(methods=['delete'], detail=True, permission_classes=[IsOwner])
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer)
+    @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer,
+            permission_classes=[IsOwner])
     def assign(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -76,7 +77,8 @@ class TaskViewSet(
         self.send_task_assigned_email(instance.id, instance.assigned_to.email)
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=['patch'], detail=True, url_path='complete', serializer_class=TaskStatusSerializer)
+    @action(methods=['patch'], detail=True, url_path='complete', serializer_class=TaskStatusSerializer,
+            permission_classes=[IsOwner])
     def complete(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
@@ -136,10 +138,15 @@ class TaskTimeLogViewSet(
 ):
     queryset = TimeLog.objects.all()
     serializer_class = TimeLogSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
     parent_lookup_kwargs = {
         'task_pk': 'task__pk',
     }
+
+    def get_permissions(self):
+        if self.action in ('list', 'create'):
+            self.permission_classes = [IsAuthenticated]
+        return super(TaskTimeLogViewSet, self).get_permissions()
 
     def get_queryset(self):
         if getattr(self, 'swagger_fake_view', False):
@@ -149,8 +156,7 @@ class TaskTimeLogViewSet(
     def perform_create(self, serializer):
         serializer.save(
             task_id=self.kwargs.get('task_pk'),
-            user=self.request.user,
-            duration=timedelta(minutes=self.request.data['duration'])
+            user=self.request.user
         )
 
     @action(methods=['get'], detail=False, url_path='start')

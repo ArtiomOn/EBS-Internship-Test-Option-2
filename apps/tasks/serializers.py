@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from rest_framework import serializers
 
 from apps.tasks.models import Task, Comment, TimeLog
@@ -40,7 +42,13 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class TimeLogSerializer(serializers.ModelSerializer):
     started_at = serializers.DateTimeField()
-    duration = serializers.DurationField()
+    duration = serializers.DurationField(read_only=True)
+    minutes = serializers.IntegerField(write_only=True)
+
+    def to_internal_value(self, data):
+        value = super(TimeLogSerializer, self).to_internal_value(data)
+        value['duration'] = timedelta(minutes=value.pop('minutes'))
+        return value
 
     class Meta:
         model = TimeLog

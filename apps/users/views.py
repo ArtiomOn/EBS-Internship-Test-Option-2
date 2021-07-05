@@ -28,7 +28,7 @@ class UserViewSet(mixins.ListModelMixin, GenericViewSet):
         user = User.objects.create(
             first_name=serializer.validated_data['first_name'],
             last_name=serializer.validated_data['last_name'],
-            username=serializer.validated_data['first_name'],
+            username=serializer.validated_data['email'],
             email=serializer.validated_data['email'],
             is_superuser=False,
             is_staff=False,

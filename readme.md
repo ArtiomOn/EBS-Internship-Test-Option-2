@@ -3,19 +3,19 @@
 
 # Milestone 2-3
 
-1. User register - `POST | users/register/`
+1. User register - `POST | users/register/` - Done
 
 
-2. Get user token - `POST | token/`
+2. Get user token - `POST | token/` - Done
 
 
-3. Get list of users - `GET | users/`
+3. Get list of users - `GET | users/` - Done
 
 
 4. Create a task - `POST | tasks/`
 
 
-5. View list of tasks - `GET | tasks/`
+5. View list of tasks - `GET | tasks/` - Done
 
 
 6. View task details by id - `GET | tasks/id/`
