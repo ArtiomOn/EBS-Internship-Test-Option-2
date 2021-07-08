@@ -16,5 +16,3 @@ RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn
 
-# Exposing Ports
-EXPOSE 5432 7700
