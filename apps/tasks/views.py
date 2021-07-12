@@ -2,12 +2,14 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.db.models import Sum, QuerySet
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
-from rest_framework.viewsets import GenericViewSet
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_nested.viewsets import NestedViewSetMixin
 from rest_framework import (
     status,
@@ -16,8 +18,8 @@ from rest_framework import (
     filters
 )
 
-from apps.tasks.models import Task, Comment, TimeLog
 from apps.tasks.filtersets import TaskFilterSet, TimeLogFilerSet
+from apps.tasks.models import Task, Comment, TimeLog
 from apps.tasks.permissions import IsOwner
 from apps.tasks.serializers import (
     TaskSerializer,
@@ -38,7 +40,7 @@ class TaskViewSet(
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = (IsAdminUser, IsOwner)
+    permission_classes = (IsAdminUser,)
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = TaskFilterSet
     ordering_fields = ['total_duration']
@@ -67,7 +69,7 @@ class TaskViewSet(
         return super(TaskViewSet, self).get_serializer_class()
 
     @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer,
-            permission_classes=[IsOwner])
+            permission_classes=[IsAdminUser])
     def assign(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -78,7 +80,7 @@ class TaskViewSet(
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path='complete', serializer_class=TaskStatusSerializer,
-            permission_classes=[IsOwner])
+            permission_classes=[IsAdminUser])
     def complete(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
@@ -194,3 +196,10 @@ class TimeLogViewSet(
     serializer_class = TimeLogSerializer
     permission_classes = [IsAuthenticated]
     filterset_class = TimeLogFilerSet
+
+    @method_decorator(cache_page(60*1))
+    def list(self, request, *args, **kwargs):
+        return super(TimeLogViewSet, self).list(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.filter_queryset(TimeLog.objects.all().order_by('-duration')[:20])
