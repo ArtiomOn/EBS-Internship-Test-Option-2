@@ -21,7 +21,17 @@ class Command(BaseCommand):
 
         data = []
         start = datetime.now()
-        admin_user = User.object.get(email='admin@admin.com')
+        # admin_user = User.object.get(email='user@user.com')
+        admin_user = User.objects.create(
+            email='admin@test.com',
+            first_name='admin_first_name',
+            last_name='admin_last_name',
+            username='admin@test.com',
+            is_superuser=True,
+            is_staff=True,
+        )
+        password = admin_user.set_password('admin')
+        admin_user.save()
         for _ in range(25000):
             random_title = (''.join(random.choice(random_letters) for _ in range(20)))
             random_description = (''.join(random.choice(random_letters) for _ in range(60)))

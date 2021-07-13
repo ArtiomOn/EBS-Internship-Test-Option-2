@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
     'drf_yasg',
     'rest_framework',
+    'django_elasticsearch_dsl',
     'django_filters',
     'django_nose',
 
@@ -117,6 +118,12 @@ DATABASES = {
     }
 }
 
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'elasticsearch:9200'
+    },
+}
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -189,4 +196,3 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
 }
-

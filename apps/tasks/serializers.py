@@ -1,8 +1,10 @@
 from datetime import timedelta
 
 from rest_framework import serializers
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 from apps.tasks.models import Task, Comment, TimeLog
+from apps.tasks import documents as task_documents
 
 
 class TaskSerializer(serializers.ModelSerializer):
@@ -57,3 +59,9 @@ class TimeLogSerializer(serializers.ModelSerializer):
             'task': {'read_only': True},
             'user': {'read_only': True},
         }
+
+
+class TaskDocumentSerializer(DocumentSerializer):
+    class Meta:
+        document = task_documents.TaskDocument
+        fields = '__all__'
