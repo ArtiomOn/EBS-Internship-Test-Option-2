@@ -24,9 +24,8 @@ class TaskDocument(Document):
                     'number_of_replicas': 0}
 
     class Django(object):
-        id = fields.IntegerField(attr='id')
-
         model = Task
+        id = fields.IntegerField(attr='id')
 
         fields = {
             'title': TextField(

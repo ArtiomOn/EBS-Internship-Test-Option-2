@@ -290,23 +290,23 @@ class TaskTimeLogTestCase(APITestCase):
             duration=None
         )
 
-    # Get all task timelogs by id by admin user
+    # Get all task time logs by id by admin user
     def test_get_all_task_timelogs_by_admin_user(self):
         response = self.client.get(f"/tasks/{self.task_admin.pk}/timelogs/", **auth(self.admin_user))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # Get all task timelogs by id by simple user
+    # Get all task time logs by id by simple user
     def test_get_all_task_timelogs_by_simple_user(self):
         response = self.client.get(f"/tasks/{self.task_simple_user.pk}/timelogs/", **auth(self.simple_user))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # Create task timelog by admin user
+    # Create task time logs by admin user
     def test_create_task_timelogs_by_admin_user(self):
         response = self.client.post(f"/tasks/{self.task_admin.pk}/timelogs/",
                                     data={'minutes': 20, 'started_at': timezone.now()}, **auth(self.admin_user))
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    # Create task timelog by simple user
+    # Create task time logs by simple user
     def test_create_task_timelogs_by_simple_user(self):
         response = self.client.post(f"/tasks/{self.task_simple_user.pk}/timelogs/",
                                     data={'minutes': 20, 'started_at': timezone.now()}, **auth(self.simple_user))
@@ -332,12 +332,12 @@ class TaskTimeLogTestCase(APITestCase):
         response = self.client.get(f"/tasks/{self.task_admin.pk}/timelogs/stop/", **auth(self.simple_user))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    # Get all timelogs by admin user
+    # Get all time logs by admin user
     def test_get_timelogs_by_admin_user(self):
         response = self.client.get('/timelogs/', **auth(self.admin_user))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    # Get all timelogs by simple user
+    # Get all time logs by simple user
     def test_get_timelogs_by_simple_user(self):
         response = self.client.get('/timelogs/', **auth(self.simple_user))
         self.assertEqual(response.status_code, status.HTTP_200_OK)

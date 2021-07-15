@@ -47,7 +47,7 @@ from apps.tasks.serializers import (
     CommentSerializer,
     TimeLogSerializer,
     TaskCreateSerializer,
-    TaskDocumentSerializer,
+    TaskDocumentSerializer
 )
 
 
@@ -189,7 +189,7 @@ class TaskTimeLogViewSet(
             duration=None,
             defaults={
                 'started_at': timezone.now(),
-                'task_id': self.kwargs.get('task_pk')
+                'task_id': self.kwargs.get('task_pk'),
             }
         )
 
@@ -210,7 +210,7 @@ class TaskTimeLogViewSet(
 
 class TimeLogViewSet(
     mixins.ListModelMixin,
-    GenericViewSet
+    GenericViewSet,
 ):
     queryset = TimeLog.objects.all()
     serializer_class = TimeLogSerializer

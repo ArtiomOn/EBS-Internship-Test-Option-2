@@ -42,4 +42,3 @@ class TimeLog(models.Model):
     class Meta:
         verbose_name = 'Time log'
         verbose_name_plural = 'Time logs'
-

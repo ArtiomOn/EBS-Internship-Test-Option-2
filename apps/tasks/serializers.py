@@ -4,7 +4,11 @@ from rest_framework import serializers
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 from apps.tasks.documents import TaskDocument
-from apps.tasks.models import Task, Comment, TimeLog
+from apps.tasks.models import (
+    Task,
+    Comment,
+    TimeLog
+)
 
 
 class TaskSerializer(serializers.ModelSerializer):
