@@ -65,4 +65,3 @@ class TaskDocumentSerializer(DocumentSerializer):
     class Meta:
         document = TaskDocument
         fields = '__all__'
-
