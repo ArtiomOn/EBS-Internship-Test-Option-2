@@ -1,4 +1,5 @@
 from elasticsearch_dsl.query import Q, MultiMatch
+
 from apps.tasks.documents import TaskDocument
 
 

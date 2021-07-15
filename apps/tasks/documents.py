@@ -1,10 +1,10 @@
+from django_elasticsearch_dsl.registries import registry
+from elasticsearch_dsl import analyzer
 from django_elasticsearch_dsl import (
     Document,
     fields,
     TextField,
 )
-from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import analyzer
 
 from apps.tasks.models import Task
 
