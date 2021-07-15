@@ -13,7 +13,7 @@ from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_QUERY_GT,
     LOOKUP_QUERY_GTE,
     LOOKUP_QUERY_LT,
-    LOOKUP_QUERY_LTE,
+    LOOKUP_QUERY_LTE
 )
 from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
