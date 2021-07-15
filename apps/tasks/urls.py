@@ -6,7 +6,7 @@ from apps.tasks.views import (
     TaskCommentViewSet,
     TimeLogViewSet,
     TaskTimeLogViewSet,
-    TaskSearchViewSet
+    TaskSearchViewSet,
 )
 
 

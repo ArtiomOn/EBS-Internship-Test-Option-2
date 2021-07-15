@@ -19,28 +19,42 @@ services:
       - "6379:6379"
 
   elasticsearch:
-    image: elasticsearch:5.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    container_name: elasticsearch
+    restart: always
     environment:
-      # server memory dependent
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
-      # - discovery.type="single-node"
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
     volumes:
-      - ./data/elasticsearch:/usr/share/elasticsearch/data
-
-  kibana:
-    image: kibana:5.4.3
+      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
-      - "127.0.0.1:8056:5601"
-    depends_on:
-      - elasticsearch
-    links:
-      - elasticsearch
+      - 9200:9200
+#  kibana:
+#    container_name: kibana
+#    image: docker.elastic.co/kibana/kibana:7.13.3
+#   # restart: always
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200    # address of elasticsearch docker container which kibana will connect
+#    ports:
+#      - 5601:5601
+#    depends_on:
+#      - elasticsearch                                   # kibana will start when elasticsearch has started
 
   app:
     build:
       context: .
     ports:
-      - "3001:3001"
+      - "5000:5000"
+    restart: always
     environment:
       - DB_HOST=${HOST}
       - DB_NAME=${NAME}
@@ -49,18 +63,18 @@ services:
     depends_on:
       - db
     command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:3001"
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:5000"
 
-  pghero:
-    image: ankane/pghero
-    container_name: pghero
-    ports:
-      - 8080:8080
-    environment:
-      DATABASE_URL: postgres://${USER}:${PASSWORD}@host.docker.internal:${PORT}/${NAME}
+#  pghero:
+#    image: ankane/pghero
+#    container_name: pghero
+#    ports:
+#      - 8080:8080
+#    environment:
+#      DATABASE_URL: postgres://${USER}:${PASSWORD}@host.docker.internal:${PORT}/${NAME}
 
 volumes:
   postgres_data:
-  esdata:
+  elasticsearch-data:
 
 

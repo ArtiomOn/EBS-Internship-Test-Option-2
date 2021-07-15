@@ -5,21 +5,22 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
-from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet, BaseDocumentViewSet, SuggestMixin, \
-    FunctionalSuggestMixin
+from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
+
 from django_elasticsearch_dsl_drf.constants import (
     LOOKUP_FILTER_RANGE,
     LOOKUP_QUERY_IN,
     LOOKUP_QUERY_GT,
     LOOKUP_QUERY_GTE,
     LOOKUP_QUERY_LT,
-    LOOKUP_QUERY_LTE
+    LOOKUP_QUERY_LTE,
 )
 from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
     OrderingFilterBackend,
     DefaultOrderingFilterBackend,
-    SearchFilterBackend, FunctionalSuggesterFilterBackend
+    SearchFilterBackend,
+    IdsFilterBackend
 )
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -36,10 +37,9 @@ from rest_framework import (
 
 from apps.tasks.filtersets import TaskFilterSet, TimeLogFilerSet
 from apps.tasks.models import Task, Comment, TimeLog
-# from apps.tasks import documents as task_documents
 from apps.tasks.documents import TaskDocument
-from apps.tasks import serializers as task_serializers
 from apps.tasks.permissions import IsOwner
+from apps.tasks.search import search
 from apps.tasks.serializers import (
     TaskSerializer,
     TaskAssignToSerializer,
@@ -47,6 +47,7 @@ from apps.tasks.serializers import (
     CommentSerializer,
     TimeLogSerializer,
     TaskCreateSerializer,
+    TaskDocumentSerializer,
 )
 
 
@@ -221,44 +222,56 @@ class TimeLogViewSet(
         return super(TimeLogViewSet, self).list(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.filter_queryset(TimeLog.objects.all().order_by('-duration')[:20])
+        return self.filter_queryset(TimeLog.objects.all().order_by('-duration'))[:20]
 
 
-class TaskSearchViewSet(DocumentViewSet):
+class TaskSearchViewSet(BaseDocumentViewSet):
     document = TaskDocument
-    serializer_class = task_serializers.TaskDocumentSerializer
+    queryset = Task.objects.all()
     # permission_classes = [IsAuthenticated]
-
+    serializer_class = TaskDocumentSerializer
     lookup_field = 'id'
+
     filter_backends = [
         FilteringFilterBackend,
+        IdsFilterBackend,
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
         SearchFilterBackend,
-        FunctionalSuggesterFilterBackend
     ]
 
-    search_fields = (
-        'title',
-        'description',
-    )
-
     filter_fields = {
-        'id': {
-            'field': 'id',
+        'title': {
+            'field': 'title',
             'lookups': [
                 LOOKUP_FILTER_RANGE,
                 LOOKUP_QUERY_IN,
                 LOOKUP_QUERY_GT,
                 LOOKUP_QUERY_GTE,
                 LOOKUP_QUERY_LT,
-                LOOKUP_QUERY_LTE
+                LOOKUP_QUERY_LTE,
             ],
         },
-        'title': 'title.raw',
-        'description': 'description.raw',
+        'description': {
+            'field': 'description',
+            'lookups': [
+                LOOKUP_FILTER_RANGE,
+                LOOKUP_QUERY_IN,
+                LOOKUP_QUERY_GT,
+                LOOKUP_QUERY_GTE,
+                LOOKUP_QUERY_LT,
+                LOOKUP_QUERY_LTE,
+            ],
+        },
     }
+
     ordering_fields = {
-        'id': 'id',
-        'title': 'title.raw',
+        'id': None,
+        'title': None,
     }
+
+    def get_queryset(self):
+        q = self.request.query_params.get('q')
+        if q is not None:
+            return search(q)
+        return super().get_queryset()
