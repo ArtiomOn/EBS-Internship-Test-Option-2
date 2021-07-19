@@ -1,7 +1,5 @@
-# Django Rest Framework - Internship tasks
-**By Artiom Oncea**
 
-# Milestone 2-3
+# Internship test
 
 1. User register - `POST | users/register/`
 

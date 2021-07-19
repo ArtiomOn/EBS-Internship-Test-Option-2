@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
         user_ids = User.objects.values_list('id', flat=True)
         task_ids = Task.objects.values_list('id', flat=True)
-        for _ in range(100000):
+        for _ in range(50000):
             random_duration = randrange(10000)
             time_log = TimeLog(task_id=choice(task_ids),
                                user_id=choice(user_ids),

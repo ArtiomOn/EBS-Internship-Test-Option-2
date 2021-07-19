@@ -19,6 +19,7 @@ class CustomUserManager(UserManager):
 
 
 class CustomUser(AbstractUser):
+
     objects = CustomUserManager()
     email = EmailField(_('email address'), blank=False, unique=True)
 

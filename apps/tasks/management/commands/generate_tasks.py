@@ -21,21 +21,11 @@ class Command(BaseCommand):
 
         data = []
         start = datetime.now()
-        # admin_user = User.object.get(email='user@user.com')
-        admin_user = User.objects.create(
-            email='admin@test.com',
-            first_name='admin_first_name',
-            last_name='admin_last_name',
-            username='admin@test.com',
-            is_superuser=True,
-            is_staff=True,
-        )
-        password = admin_user.set_password('admin')
-        admin_user.save()
-        for _ in range(25000):
+        user_ids = User.objects.values_list('id', flat=True)
+        for _ in range(50000):
             random_title = (''.join(random.choice(random_letters) for _ in range(20)))
             random_description = (''.join(random.choice(random_letters) for _ in range(60)))
-            data.append(Task(title=random_title, description=random_description, assigned_to=admin_user))
+            data.append(Task(title=random_title, description=random_description, assigned_to_id=random.choice(user_ids)))
         Task.objects.bulk_create(data)
         end = datetime.now() - start
         self._log_creating_notice(end)

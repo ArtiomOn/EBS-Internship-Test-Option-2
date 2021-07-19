@@ -4,8 +4,6 @@ from django.contrib.admin import ModelAdmin
 from apps.users.models import CustomUser
 
 
-# Register your models here.
-
 @admin.register(CustomUser)
 class CustomUserAdmin(ModelAdmin):
     list_display = ['id', 'username', 'first_name', 'last_name', 'email']

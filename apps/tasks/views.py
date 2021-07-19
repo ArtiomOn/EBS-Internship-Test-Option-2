@@ -8,19 +8,22 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 
 from django_elasticsearch_dsl_drf.constants import (
-    LOOKUP_FILTER_RANGE,
     LOOKUP_QUERY_IN,
-    LOOKUP_QUERY_GT,
-    LOOKUP_QUERY_GTE,
-    LOOKUP_QUERY_LT,
-    LOOKUP_QUERY_LTE
+    LOOKUP_FILTER_TERMS,
+    LOOKUP_FILTER_PREFIX,
+    LOOKUP_FILTER_WILDCARD,
+    LOOKUP_QUERY_EXCLUDE,
+    LOOKUP_FILTER_TERM,
+    LOOKUP_FILTER_REGEXP,
+    LOOKUP_QUERY_CONTAINS,
+    LOOKUP_QUERY_STARTSWITH,
+    LOOKUP_QUERY_ENDSWITH
 )
 from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
     OrderingFilterBackend,
     DefaultOrderingFilterBackend,
-    SearchFilterBackend,
-    IdsFilterBackend
+    IdsFilterBackend, CompoundSearchFilterBackend
 )
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -228,7 +231,7 @@ class TimeLogViewSet(
 class TaskSearchViewSet(BaseDocumentViewSet):
     document = TaskDocument
     queryset = Task.objects.all()
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = TaskDocumentSerializer
     lookup_field = 'id'
 
@@ -237,30 +240,38 @@ class TaskSearchViewSet(BaseDocumentViewSet):
         IdsFilterBackend,
         OrderingFilterBackend,
         DefaultOrderingFilterBackend,
-        SearchFilterBackend,
+        CompoundSearchFilterBackend,
     ]
 
     filter_fields = {
         'title': {
             'field': 'title',
             'lookups': [
-                LOOKUP_FILTER_RANGE,
+                LOOKUP_FILTER_TERM,
+                LOOKUP_FILTER_TERMS,
+                LOOKUP_FILTER_PREFIX,
+                LOOKUP_FILTER_WILDCARD,
+                LOOKUP_FILTER_REGEXP,
+                LOOKUP_QUERY_CONTAINS,
                 LOOKUP_QUERY_IN,
-                LOOKUP_QUERY_GT,
-                LOOKUP_QUERY_GTE,
-                LOOKUP_QUERY_LT,
-                LOOKUP_QUERY_LTE,
+                LOOKUP_QUERY_STARTSWITH,
+                LOOKUP_QUERY_ENDSWITH,
+                LOOKUP_QUERY_EXCLUDE,
             ],
         },
         'description': {
             'field': 'description',
             'lookups': [
-                LOOKUP_FILTER_RANGE,
+                LOOKUP_FILTER_TERM,
+                LOOKUP_FILTER_TERMS,
+                LOOKUP_FILTER_PREFIX,
+                LOOKUP_FILTER_WILDCARD,
+                LOOKUP_FILTER_REGEXP,
+                LOOKUP_QUERY_CONTAINS,
                 LOOKUP_QUERY_IN,
-                LOOKUP_QUERY_GT,
-                LOOKUP_QUERY_GTE,
-                LOOKUP_QUERY_LT,
-                LOOKUP_QUERY_LTE,
+                LOOKUP_QUERY_STARTSWITH,
+                LOOKUP_QUERY_ENDSWITH,
+                LOOKUP_QUERY_EXCLUDE,
             ],
         },
     }
