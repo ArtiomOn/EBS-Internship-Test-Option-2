@@ -20,13 +20,13 @@ html_strip = analyzer(
 class TaskDocument(Document):
     class Index:
         name = 'task'
-        settings = {'number_of_shards': 1,
-                    'number_of_replicas': 0}
+        settings = {
+            'number_of_shards': 1,
+            'number_of_replicas': 0,
+            }
 
     class Django(object):
         model = Task
-        id = fields.IntegerField(attr='id')
-
         fields = {
             'title': TextField(
                 analyzer=html_strip,
