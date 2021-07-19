@@ -49,3 +49,9 @@
 
 
 16. Get the logged time in last month - `GET | timelogs/?date=this_month/`
+
+
+17. **Using elasticsearch** | Get all tasks by title and description - `GET | tasksearch/?title=title/`
+
+
+18. **Using elasticsearch** | Get task by id - `GET | tasksearch/1/`
