@@ -17,48 +17,17 @@ def auth(user):
 
 
 class TaskTestCase(APITestCase):
-    def setUp(self):
-        # Create simple user
-        self.simple_user = User.objects.create(
-            email='simple@test.com',
-            first_name='simple_first_name',
-            last_name='simple_last_name',
-            username='simple@test.com',
-            is_superuser=False,
-            is_staff=False,
-        )
-        self.password = self.simple_user.set_password('simple')
-        self.simple_user.save()
+    fixtures = ['data_task.json', 'data_user.json']
 
-        # Create admin user
-        self.admin_user = User.objects.create(
-            email='admin@test.com',
-            first_name='admin_first_name',
-            last_name='admin_last_name',
-            username='admin@test.com',
-            is_superuser=True,
-            is_staff=True,
-        )
-        self.password = self.admin_user.set_password('admin')
-        self.admin_user.save()
+    def setUp(self):
+        self.simple_user = User.objects.get(email='test@test.com')
+        self.admin_user = User.objects.get(email='admin@test.com')
 
         # Create task for admin user
-        self.task_admin = Task.objects.create(
-            title='admin_title',
-            description='admin_description',
-            status=False,
-            assigned_to=self.admin_user
-        )
-        self.task_admin.save()
+        self.task_admin = Task.objects.get(title='mDPseyyuOOuDgIbMJOmm')
 
         # Create task for simple user
-        self.task_simple_user = Task.objects.create(
-            title='simple_title',
-            description='simple_description',
-            status=False,
-            assigned_to=self.simple_user
-        )
-        self.task_simple_user.save()
+        self.task_simple_user = Task.objects.get(title='KjNtXFXrIzVycGRVjLZM')
 
     # Create task by simple user
     def test_simple_user_task_create(self):

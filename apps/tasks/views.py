@@ -92,7 +92,7 @@ class TaskViewSet(
         return super(TaskViewSet, self).get_serializer_class()
 
     @action(methods=['patch'], detail=True, url_path='assign', serializer_class=TaskAssignToSerializer,
-            permission_classes=[IsAdminUser])
+            permission_classes=[IsOwner])
     def assign(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data)
@@ -103,7 +103,7 @@ class TaskViewSet(
         return Response(status=status.HTTP_200_OK)
 
     @action(methods=['patch'], detail=True, url_path='complete', serializer_class=TaskStatusSerializer,
-            permission_classes=[IsAdminUser])
+            permission_classes=[IsOwner])
     def complete(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data)
@@ -225,13 +225,13 @@ class TimeLogViewSet(
         return super(TimeLogViewSet, self).list(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.filter_queryset(TimeLog.objects.all().order_by('-duration'))[:20]
+        return self.filter_queryset(TimeLog.objects.all().order_by('-duration'))
 
 
 class TaskSearchViewSet(BaseDocumentViewSet):
     document = TaskDocument
     queryset = Task.objects.all()
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = TaskDocumentSerializer
     lookup_field = 'id'
 

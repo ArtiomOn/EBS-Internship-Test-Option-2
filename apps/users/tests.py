@@ -14,30 +14,12 @@ def auth(user):
 
 
 class UserTestCase(APITestCase):
+    fixtures = ['data_user.json']
 
     def setUp(self):
-        self.simple_user = User.objects.create(
-            email='simple@test.com',
-            first_name='simple_first_name',
-            last_name='simple_last_name',
-            username='simple@test.com',
-            is_superuser=False,
-            is_staff=False,
-        )
-        self.password = self.simple_user.set_password('simple')
-        self.simple_user.save()
+        self.simple_user = User.objects.get(email='test@test.com')
 
-        self.admin_user = User.objects.create(
-            email='admin@test.com',
-            first_name='admin_first_name',
-            last_name='admin_last_name',
-            username='admin@test.com',
-            is_superuser=True,
-            is_staff=True,
-        )
-        self.password = self.admin_user.set_password('admin')
-        self.admin_user.save()
-
+        self.admin_user = User.objects.get(email='admin@test.com')
         self.refresh = RefreshToken.for_user(self.admin_user)
 
     def test_user_access_token(self):
@@ -56,20 +38,10 @@ class UserTestCase(APITestCase):
         response = self.client.get('/users/', **auth(self.simple_user))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_admin_user_register(self):
+    def test_user_register(self):
         response = self.client.post(path='/users/register/', data={
             "first_name": 'admin_first_name',
             "last_name": 'admin_last_name',
-            "email": "admin@example.com",
-            "password": 'admin_password'},
-                                    **auth(self.admin_user))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_simple_user_register(self):
-        response = self.client.post(path='/users/register/', data={
-            "first_name": 'simple_first_name',
-            "last_name": 'simple_last_name',
-            "email": "simple@example.com",
-            "password": 'simple_password'},
-                                    **auth(self.simple_user))
+            "email": "123123@123.com",
+            "password": 'admin_password'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
