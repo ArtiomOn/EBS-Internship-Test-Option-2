@@ -4,7 +4,7 @@ chardet==4.0.0
 coreapi==2.3.3
 coreschema==0.0.4
 coverage==5.5
-Django==3.2.5
+Django==3.2.12
 django-elasticsearch-dsl==7.2.0
 django-elasticsearch-dsl-drf==0.22.1
 django-environ==0.4.5
